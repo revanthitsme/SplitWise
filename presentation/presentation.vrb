@@ -1,0 +1,12 @@
+\frametitle{\bf Future Plan of Action}
+\begin{block}{Reasoning for the additional feature selection}
+Planning on taking up the second additional feature i.e notification management,when thers a settle up option.
+For this, we are planning on creating another tab in the frontend and a model in the backend for notifications.
+\end{block}
+\begin{block}{Detailed plan}
+\begin{enumerate}
+\item Existing tables are to be extensively used.
+\item For example, date ranges can be accessed from Friends and Groups tab and we can list out the transactions pertaining to that range.
+\item to get the bar graphs, pie chart, time series plot, Matplotlib in python can be used.
+\end{enumerate}
+\end{block}
