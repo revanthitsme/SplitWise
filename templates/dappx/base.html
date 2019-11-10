@@ -16,6 +16,7 @@
           {% if user.is_authenticated %}
             <li><a href="{% url 'logout' %}">Logout</a></li>
             <li><a href="{% url 'dappx:Reset' %}">Reset Password</a></li>
+            <img src="{{ user.userprofileinfo.profile_pic.url }}" alt=" " style="width:50px;height:50px;>
             
           {% else %}
             <li><a class="navbar-link" href="{% url 'dappx:register' %}">Register</a></li>     
