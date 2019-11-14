@@ -48,13 +48,8 @@ def Reset(request):
 @login_required
 def update_pic(request):
     if request.method == 'POST':
-<<<<<<< HEAD
         # form = ProfilePicUpdateForm(data=request.POST,instance=request.user)
         form = ProfilePicUpdateForm(request.POST, request.FILES, instance=request.user.userprofileinfo)
-
-=======
-        form = ProfilePicUpdateForm(request.POST,request.FILES,instance=request.user.userprofileinfo)
->>>>>>> de6b4e49296ec7daaff479f12b76cef361d2057f
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
@@ -157,16 +152,19 @@ def Groups(request):
 
 def Transactions(request):
     if request.method == 'POST':
-        Groups = request.POST.get('Group')
+        Groups = request.POST.get('Group') 
         Receiver = request.POST.get('Receiver')
+        Receivers = Receiver.split(',')
         Amount = request.POST.get('Amount')
         Description = request.POST.get('Description')
         user = User.objects.get(id=request.user.id)
-        Receiver1 = User.objects.get(username=Receiver).pk
-        Receiver2= User.objects.get(id=Receiver1)
-        Transactions_form = Transaction(Groups=Groups,Donor=user,Receiver=Receiver2,Amount=Amount,Description=Description)
+        ## DONT DELETE ##
+        #Receiver1 = User.objects.get(username=Receiver).pk
+        #Receiver2= User.objects.get(id=Receiver1) 
+        
+        Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
         Transactions_form.save()
-        return render(request, 'dappx/test.html',{'test_var1':Groups,
+        return render(request, 'dappx/test.html',{'test_var1':Receivers,
                                                     'test_var2':Transactions_form.Date})
         if Transactions_form.is_valid():
 

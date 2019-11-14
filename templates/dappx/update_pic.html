@@ -10,21 +10,9 @@
       <div class="container">
         <ul class="nav navbar-nav">{# Django Home Link / Admin Link / Register Link#}
           <li><a class="navbar-brand" href="{% url 'index' %}">Home</a></li>
-          <!-- <li><a class="navbar-link" href="{% url 'admin:index' %}">Admin</a></li> -->
-<<<<<<< HEAD
-          
-=======
-
->>>>>>> de6b4e49296ec7daaff479f12b76cef361d2057f
           {# Some logic on what to display for last item#}
           {% if user.is_authenticated %}
             <li><a href="{% url 'logout' %}">Logout</a></li>
-            <!-- <li>{{user.username}}</li> -->
-<<<<<<< HEAD
-            
-=======
-
->>>>>>> de6b4e49296ec7daaff479f12b76cef361d2057f
           {% else %}
             <li><a class="navbar-link" href="{% url 'dappx:register' %}">Register</a></li>     
             <li><a class="navbar-link" href="{% url 'dappx:user_login' %}">Login</a></li>
@@ -34,25 +22,6 @@
     <div class="container">
        <div class="jumbotron">
        <h2 style="text-align: left;">Change the Picture:</h2>
-      <!--  <form method="post" action="{% url 'dappx:Reset' %}">
-          {% csrf_token %}
-          {# A more "HTML" way of creating the login form#}
-          {% if wrong %}
-            <h3>both passwords are not same</h3>
-          
-          {% endif %}
-          <label for="username">{{user.username}}</label>
-          <input type="text" name="username" placeholder="Username">
-          <label for="new_password">New Password:</label>
-          <input type="password" name="new_password" placeholder="Password">
-          <label for="new_password1">Confirm Password:</label>
-          <input type="password" name="new_password1" placeholder="Password">
-          <input type="submit" name="" value="Reset">
-<<<<<<< HEAD
-
-=======
->>>>>>> de6b4e49296ec7daaff479f12b76cef361d2057f
-          </form> -->
         <h3>Chnage your profile picture here</h3><form enctype="multipart/form-data" method="POST">
           {% csrf_token %}
           {{ form.as_p }}
