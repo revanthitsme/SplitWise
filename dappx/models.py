@@ -40,19 +40,27 @@ class UserProfileInfo(models.Model):
 	def __str__(self):
 		return self.user.username
 
+######################
 
 
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.UserProfileInfo.save()
-#############################
-#just trying
-# class UserList(AbstractBaseUser):
-#     first_name = models.CharField(max_length=200, blank=True, help_text="The first name of the user.")
-#     last_name = models.CharField(max_length=200, blank=True, help_text="The last name of the user.")
-#     email = models.EmailField(
-#         verbose_name='email address',
-#         max_length=255,
-#         unique=True,
-#         help_text="The email and username of the user. Required."
-#     )
+class Transaction(models.Model):
+	Groups = models.CharField(max_length=18)
+
+	Donor = models.ForeignKey(User,related_name='Donor',on_delete=models.CASCADE)
+
+	Receiver = models.ForeignKey(User,related_name='Receiver',on_delete=models.CASCADE)
+
+	Description = models.CharField(max_length=50)
+
+	Amount = models.IntegerField(default=0)
+
+	Tag = models.CharField(max_length=15)
+
+	Date = models.DateTimeField(auto_now=True)
+
+
+#####################
+
+
+#class Friends(models.Model):
+

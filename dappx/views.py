@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect
-from dappx.forms import UserForm,UserProfileInfoForm,ProfilePwUpdateForm,ProfilePicUpdateForm
+from dappx.forms import UserForm,UserProfileInfoForm,ProfilePwUpdateForm,ProfilePicUpdateForm,TransactionsForm
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.models import User
 from django.contrib import messages
+from dappx.models import Transaction
 
 # Create your views here.
 
@@ -46,9 +48,13 @@ def Reset(request):
 @login_required
 def update_pic(request):
     if request.method == 'POST':
+<<<<<<< HEAD
         # form = ProfilePicUpdateForm(data=request.POST,instance=request.user)
         form = ProfilePicUpdateForm(request.POST, request.FILES, instance=request.user.userprofileinfo)
 
+=======
+        form = ProfilePicUpdateForm(request.POST,request.FILES,instance=request.user.userprofileinfo)
+>>>>>>> de6b4e49296ec7daaff479f12b76cef361d2057f
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
@@ -128,3 +134,46 @@ def Friends(request):
 #####################################
 def Groups(request):
     return render(request, 'dappx/Groups.html')
+
+#####################################
+
+###DONOT DELETE
+
+###
+# def Transactions(request):
+#     if request.method == 'POST':
+#         user_form = UserForm(data=request.POST)
+#         if user_form.is_valid():
+#             user = user_form.save()
+#             user.save()
+#         else:
+#             print(user_form.errors)
+#     else:
+#         user_form = UserForm()
+#     return render(request,'dappx/Transactions.html',
+#                           {'false':False})
+
+#######################################
+
+def Transactions(request):
+    if request.method == 'POST':
+        Groups = request.POST.get('Group')
+        Receiver = request.POST.get('Receiver')
+        Amount = request.POST.get('Amount')
+        Description = request.POST.get('Description')
+        user = User.objects.get(id=request.user.id)
+        Receiver1 = User.objects.get(username=Receiver).pk
+        Receiver2= User.objects.get(id=Receiver1)
+        Transactions_form = Transaction(Groups=Groups,Donor=user,Receiver=Receiver2,Amount=Amount,Description=Description)
+        Transactions_form.save()
+        return render(request, 'dappx/test.html',{'test_var1':Groups,
+                                                    'test_var2':Transactions_form.Date})
+        if Transactions_form.is_valid():
+
+            transactions = transcations_form.save()
+            transactions.save()
+        else:
+            print(Transactions_form.errors)
+    else:
+        transcations_form = TransactionsForm(data=request.POST)
+    return render(request, 'dappx/Transactions.html')

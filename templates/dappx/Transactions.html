@@ -1,0 +1,38 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+      <h1>add a transaction here</h1>
+      <form method="post" action="{% url 'dappx:Transactions' %}">
+          {% csrf_token %}
+          {# A more "HTML" way of creating the login form#}
+          <label for="Group">Group Name:</label>
+          <input type="text" name="Group" placeholder="Group">
+          <br>
+          <!-- <label for="Donor">Donor:</label>
+          <input type="text" name="Donor" placeholder="Donor">
+          <br> -->
+          <label for="Receiver">Receiver:</label>
+          <input type="text" name="Receiver" placeholder="Receiver">
+          <br>
+          <label for="Amount">Amount:</label>
+          <input type="number" name="Amount" placeholder="Amount">
+          <br>
+          <label for="Description">Description:</label>
+          <input type="text" name="Description" placeholder="Description">
+          <br>
+          <input type="submit" name="" value="Transactions">
+      	  </form>
+      	 <!--  <h2>FORM 2:</h2>
+      	  <form enctype="multipart/form-data" method="POST" action="{% url 'dappx:Transactions' %}">
+          {% csrf_token %}
+          {{ user_form }}
+          <h3>boo</h3>
+          <h3>{{false}}</h3>
+          <input type="submit" name="" value="Transactions">
+        </form> -->
+
+    </div>
+  </div>
+{% endblock %}
+

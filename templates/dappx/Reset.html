@@ -26,22 +26,6 @@
     <div class="container">
        <div class="jumbotron">
        <h2 style="text-align: left;">Reset Password :</h2>
-      <!--  <form method="post" action="{% url 'dappx:Reset' %}">
-          {% csrf_token %}
-          {# A more "HTML" way of creating the login form#}
-          {% if wrong %}
-            <h3>both passwords are not same</h3>
-          
-          {% endif %}
-          <label for="username">{{user.username}}</label>
-          <input type="text" name="username" placeholder="Username">
-          <label for="new_password">New Password:</label>
-          <input type="password" name="new_password" placeholder="Password">
-          <label for="new_password1">Confirm Password:</label>
-          <input type="password" name="new_password1" placeholder="Password">
-          <input type="submit" name="" value="Reset">
-
-          </form> -->
         <h3>Just Enter the new Password.</h3><form enctype="multipart/form-data" method="POST">
           {% csrf_token %}
           {{ form.as_p }}
