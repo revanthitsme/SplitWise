@@ -44,9 +44,11 @@ def Reset(request):
 
 
 @login_required
-def update(request):
+def update_pic(request):
     if request.method == 'POST':
-        form = ProfilePicUpdateForm(data=request.POST,instance=request.user)
+        # form = ProfilePicUpdateForm(data=request.POST,instance=request.user)
+        form = ProfilePicUpdateForm(request.POST, request.FILES, instance=request.user.userprofileinfo)
+
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
@@ -66,7 +68,7 @@ def update(request):
         'form': form,
     }
 
-    return render(request, 'dappx/update.html', context)
+    return render(request, 'dappx/update_pic.html', context)
 
 
 
