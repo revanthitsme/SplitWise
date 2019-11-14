@@ -45,3 +45,14 @@ class UserProfileInfo(models.Model):
 # @receiver(post_save, sender=User)
 # def save_user_profile(sender, instance, **kwargs):
 #     instance.UserProfileInfo.save()
+#############################
+#just trying
+# class UserList(AbstractBaseUser):
+#     first_name = models.CharField(max_length=200, blank=True, help_text="The first name of the user.")
+#     last_name = models.CharField(max_length=200, blank=True, help_text="The last name of the user.")
+#     email = models.EmailField(
+#         verbose_name='email address',
+#         max_length=255,
+#         unique=True,
+#         help_text="The email and username of the user. Required."
+#     )

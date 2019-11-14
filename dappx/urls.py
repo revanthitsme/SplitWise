@@ -13,4 +13,6 @@ urlpatterns=[
     url(r'^user_login/$',views.user_login,name='user_login'),
     #url(r'^Reset/$',views.Reset,name='Reset'),
     url(r'^password/$', views.Reset, name='Reset'),
+    url(r'^Friends/$', views.Friends, name='Friends'),
+    url(r'^Groups/$', views.Groups, name='Groups'),
 ]
