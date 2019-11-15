@@ -30,9 +30,10 @@ class Transaction(models.Model):
 	#Receiver = models.ForeignKey(User,related_name='Receiver',on_delete=models.CASCADE)
 
 	Receivers = ListCharField(
-		Receiver = models.CharField(max_length=18),
+		base_field = models.CharField(max_length=18),
         size=10,
-        max_length=(18 * 11)  # 18 * 10 character nominals, plus commas
+        max_length=(18 * 11),  # 18 * 10 character nominals, plus commas
+        default = []
     )
 
 	Description = models.CharField(max_length=50)
