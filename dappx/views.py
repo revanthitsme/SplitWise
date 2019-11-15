@@ -8,7 +8,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
-from dappx.models import Transaction
+from dappx.models import Transaction, Friends
 
 # Create your views here.
 
@@ -123,8 +123,11 @@ def user_login(request):
 
 
 #####################################
-def Friends(request):
-    return render(request, 'dappx/Friends.html')
+def Friendstab(request):
+    friendobj = Friends.objects.get_or_create(current_user=request.user)
+    friends_of_curr_user = friendobj[0].Friendslist.all()
+    return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
+                                                    })
 
 #####################################
 def Groups(request):
@@ -161,7 +164,10 @@ def Transactions(request):
         ## DONT DELETE ##
         #Receiver1 = User.objects.get(username=Receiver).pk
         #Receiver2= User.objects.get(id=Receiver1) 
-        
+        for Receiver1 in Receivers:
+            new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
+            Friends.make_friend(request.user, new_friend)
+
         Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
         Transactions_form.save()
         return render(request, 'dappx/test.html',{'test_var1':Receivers,
@@ -175,3 +181,48 @@ def Transactions(request):
     else:
         transcations_form = TransactionsForm(data=request.POST)
     return render(request, 'dappx/Transactions.html')
+
+#########     DONT DELETE     ######
+# def addfriends(request):
+#     if request.method == 'POST':
+#         Friends_str = request.POST.get('Friends')
+#         Friendslist = Friends_str.split(',')
+#         idlist = [User.objects.get(username=Friend).pk for Friend in Friendslist]
+#         # return render(request, 'dappx/test.html',{'test_var1':idlist})
+#         user = User.objects.get(id=request.user.id)
+#         Friends_form = Friends(Friendof=user)
+#         Friends_form.save()
+#         for idu in idlist:
+#             Friends_form.Friendslist.add(User.objects.get(id=idu))
+#             pass
+#         Friends_form.save()
+#         return render(request, 'dappx/test.html',{'test_var1':Friends_form,
+#                                                     'test_var2':idlist})
+
+#########33
+def addfriends(request):
+    if request.method == 'POST':
+        Friends_str = request.POST.get('Friendsl')
+        Friendslist = Friends_str.split(',')
+        idlist = [User.objects.get(username=Friend).pk for Friend in Friendslist]
+        # return render(request, 'dappx/test.html',{'test_var1':idlist})
+        # user = User.objects.get(id=request.user.id)
+        for idu in idlist:
+            Friend2 = User.objects.get(id=idu)
+            Friends.make_friend(request.user, Friend2)
+            Friends.make_friend(Friend2, request.user)
+        
+        friendobj = Friends.objects.get(current_user=request.user)
+        friends_of_curr_user = friendobj.Friendslist.all()
+        return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
+                                                    })
+
+def change_friends(request,operation,pk):
+    friend = User.objects.get(id=pk)
+    if operation == 'add':
+        Friends.make_friend(request.user, friend)
+    elif operation == 'remove':
+        Friend.lose_friend(request.user, friend)
+
+    return render(request, 'dappx/Friends.html')
+    

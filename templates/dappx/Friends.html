@@ -3,6 +3,20 @@
   <div class="container">
     <div class="jumbotron">
       <h1>Here are your friends.</h1>
+      {% for user in friends %}
+      	<a href="" action="">
+      		<h2>{{ user.username }}</h2>
+      	</a>
+      {% endfor %}
+      <br>
+      <form method="post" action="{% url 'dappx:addfriends' %}">
+          {% csrf_token %}<!-- 
+          {{ addfriend_form.as_p }} -->
+          <label for="Friendsl">Friends:</label>
+          <input type="text" name="Friendsl" placeholder="Friends">
+          <br>
+          <input type="submit" name="" value="Add">
+        </form>
     </div>
   </div>
 {% endblock %}

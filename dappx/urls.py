@@ -2,7 +2,6 @@
 
 from django.conf.urls import url
 from dappx import views
-
 # SET THE NAMESPACE!
 app_name = 'dappx'
 
@@ -14,7 +13,9 @@ urlpatterns=[
     url(r'^change_pic/$',views.update_pic,name='update_pic'),
     url(r'^password/$', views.Reset, name='Reset'),
     url(r'^change_pic/$',views.update_pic,name='update_pic'),
-    url(r'^Friends/$', views.Friends, name='Friends'),
+    url(r'^Friends/$', views.Friendstab, name='Friendstab'),
     url(r'^Groups/$', views.Groups, name='Groups'),
     url(r'^Transactions/$', views.Transactions, name='Transactions'),
+    url(r'^addfriends/$', views.addfriends, name='addfriends'),
+    url(r'^connect/(?P<operation>.+)/(?P<pk>\d+)/$', views.change_friends, name='change_friends'),
 ]

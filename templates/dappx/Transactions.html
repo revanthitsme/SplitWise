@@ -12,6 +12,12 @@
           <!-- <label for="Donor">Donor:</label>
           <input type="text" name="Donor" placeholder="Donor">
           <br> -->
+          {% if DupReceivers %}
+          <h3>there's a repition </h3>
+          {% endif %}
+          {% if NoReceivers %}
+          <h3>User doesn't exist</h3>
+          {% endif %}
           <label for="Receiver">Receiver:</label>
           <input type="text" name="Receiver" placeholder="Receiver">
           <br>

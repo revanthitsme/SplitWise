@@ -48,5 +48,24 @@ class Transaction(models.Model):
 #####################
 
 
-#class Friends(models.Model):
+# class Friends(models.Model):
+# 	Friendof = models.ForeignKey(User,related_name='Friendof',on_delete=models.CASCADE)
+# 	Friendslist = models.ManyToManyField(User,related_name='Friendslist')
 
+class Friends(models.Model):
+	Friendslist = models.ManyToManyField(User)
+	current_user = models.ForeignKey(User,related_name='owner',on_delete=models.CASCADE,null=True)
+
+	@classmethod
+	def make_friend(cls, current_user, new_friend):
+		friends, created =cls.objects.get_or_create(
+			current_user=current_user
+		)
+		friends.Friendslist.add(new_friend)
+
+	@classmethod
+	def lose_friend(cls, current_user, new_friend):
+		friends, created =cls.objects.get_or_create(
+			current_user=current_user
+		)
+		friends.Friendslist.remove(new_friend)
