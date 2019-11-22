@@ -164,10 +164,16 @@ def Transactions(request):
         ## DONT DELETE ##
         #Receiver1 = User.objects.get(username=Receiver).pk
         #Receiver2= User.objects.get(id=Receiver1) 
-        for Receiver1 in Receivers:
-            new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
-            Friends.make_friend(request.user, new_friend)
-
+        ###for invalid users an repititon
+        if len(Receivers) == len(set(Receivers)) :
+            for Receiver in Receivers:
+                try:
+                    Receiverid = User.objects.get(username=Receiver).pk
+                except Exception as e:
+                    return render(request, 'dappx/Transactions.html',{'NoReceivers': True})
+        else:
+            return render(request, 'dappx/Transactions.html',{'DupReceivers': True})
+            
         Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
         Transactions_form.save()
         return render(request, 'dappx/test.html',{'test_var1':Receivers,
