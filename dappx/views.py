@@ -9,7 +9,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
 from dappx.models import Transaction, Friends, ftoftransaction
-
+from django.db.models import Avg, Count, Min, Sum
 # Create your views here.
 
 def index(request):
@@ -121,11 +121,79 @@ def user_login(request):
 	else:
 		return render(request, 'dappx/login.html', {})
 
+#####################################
+def amount_of_each(request, friendslist):
+    amount_list = []
+    owed_list = []
+    owed_friend_list = []
+    owe_list = []
+    owe_friend_list = []
+    nothing_friend_list = []
+    for friend in friendslist:
+        userid = request.user.pk
+        friend_username = friend.username
+        friendid = friend.pk
+        transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid)
+        owed = transactions.aggregate(Sum('Amount'))
+        owed = owed["Amount__sum"]
+        #owed_list.append(owed)
+        transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid)
+        owe = transactions1.aggregate(Sum('Amount'))
+        owe = owe["Amount__sum"]
+        #owe_list.append(owe)
+        if owed is not None and owe is not None:
+            if owed > owe:
+                owed_list.append(owed - owe)
+                owed_friend_list.append(friend)
+            elif owe > owed:
+                owe_list.append(owe - owed)
+                owe_friend_list.append(friend)
+            else:
+                nothing_friend_list.append(friend)
+        elif owed is None and owe is not None:
+            if owe > 0:
+                owe_list.append(owe)
+                owe_friend_list.append(friend)
+            else:
+                nothing_friend_list.append(friend)
+        elif owed is not None and owe is None:
+            if owed > 0:
+                owed_list.append(owed)
+                owed_friend_list.append(friend)
+            else:
+                nothing_friend_list.append(friend)
+        else:
+            nothing_friend_list.append(friend)
+
+    owed_dict = {} 
+    for key in owed_friend_list: 
+        for value in owed_list: 
+            owed_dict[key] = value 
+            owed_list.remove(value) 
+            break
+    owe_dict = {} 
+    for key in owe_friend_list: 
+        for value in owe_list: 
+            owe_dict[key] = value 
+            owe_list.remove(value) 
+            break
+    friendobj = Friends.objects.get_or_create(current_user=request.user)
+    friends_of_curr_user = friendobj[0].Friendslist.all()
+    print("length: ",end=' ')
+    for i in range(len(owe_list)):
+        print(i, end='  ')
+    print("")
+    return render(request, 'dappx/Friends.html',{'owed_dict':owed_dict,'owe_dict':owe_dict,'owe_list':owe_list,'owe_friend_list':owe_friend_list,
+            'owed_list':owed_list,'owed_friend_list':owed_friend_list,'nothing_friend_list':nothing_friend_list,'friends':friends_of_curr_user})
+
+
 
 #####################################
 def Friendstab(request):
     friendobj = Friends.objects.get_or_create(current_user=request.user)
     friends_of_curr_user = friendobj[0].Friendslist.all()
+    amount_list = amount_of_each(request, friends_of_curr_user)
+    return amount_of_each(request, friends_of_curr_user)
     return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
                                                     })
 
@@ -134,24 +202,6 @@ def Groups(request):
     return render(request, 'dappx/Groups.html')
 
 #####################################
-
-###DONOT DELETE
-
-###
-# def Transactions(request):
-#     if request.method == 'POST':
-#         user_form = UserForm(data=request.POST)
-#         if user_form.is_valid():
-#             user = user_form.save()
-#             user.save()
-#         else:
-#             print(user_form.errors)
-#     else:
-#         user_form = UserForm()
-#     return render(request,'dappx/Transactions.html',
-#                           {'false':False})
-
-#######################################
 
 def Transactions(request):
     if request.method == 'POST':
@@ -180,7 +230,12 @@ def Transactions(request):
             Friends.make_friend(new_friend, request.user)
             amounteach = int(Amount)/(len(Receivers)+1)
             #Assumption: FtoFTransactions is valid
-            ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+            if int(Amount)>=0:
+                ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+                pass
+            else:
+                ftoftransaction_form = ftoftransaction(Donor=new_friend,Receiver=user,Amount=abs(amounteach),Damount=abs(amounteach),Description=Description,Group=Groups)
+            #ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
             ftoftransaction_form.save()
 
         Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
@@ -196,24 +251,7 @@ def Transactions(request):
         transcations_form = TransactionsForm(data=request.POST)
     return render(request, 'dappx/Transactions.html')
 
-#########     DONT DELETE     ######
-# def addfriends(request):
-#     if request.method == 'POST':
-#         Friends_str = request.POST.get('Friends')
-#         Friendslist = Friends_str.split(',')
-#         idlist = [User.objects.get(username=Friend).pk for Friend in Friendslist]
-#         # return render(request, 'dappx/test.html',{'test_var1':idlist})
-#         user = User.objects.get(id=request.user.id)
-#         Friends_form = Friends(Friendof=user)
-#         Friends_form.save()
-#         for idu in idlist:
-#             Friends_form.Friendslist.add(User.objects.get(id=idu))
-#             pass
-#         Friends_form.save()
-#         return render(request, 'dappx/test.html',{'test_var1':Friends_form,
-#                                                     'test_var2':idlist})
 
-#########33
 def addfriends(request):
     if request.method == 'POST':
         Friends_str = request.POST.get('Friendsl')
@@ -225,12 +263,9 @@ def addfriends(request):
             Friend2 = User.objects.get(id=idu)
             Friends.make_friend(request.user, Friend2)
             Friends.make_friend(Friend2, request.user)
-        
         friendobj = Friends.objects.get(current_user=request.user)
         friends_of_curr_user = friendobj.Friendslist.all()
     return Friendstab(request)
-        # return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
-        #                                             })
 
 # def change_friends(request,operation,pk):
 #     friend = User.objects.get(id=pk)
@@ -259,13 +294,13 @@ def view_friend(request, pk):
 
     return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend2})
 
+
 def settle_up(request, pk):
     Friend3 = User.objects.get(id=pk)
     friend_username = Friend3.username
     friendid = pk
     userid = request.user.pk
     username = request.user.username
-
     ##friend owes how much
     #transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid).update(Amount=0)
     transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid)
@@ -279,3 +314,5 @@ def settle_up(request, pk):
         transaction.Amount = 0
         transaction.save()
     return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend3})
+
+#def totsum(request,pk):

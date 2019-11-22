@@ -3,16 +3,17 @@
   <div class="container">
     <div class="jumbotron">
       <h1>Here are your friends.</h1>
-      {% for friend in friends %}
-      	<a href="{% url 'dappx:view_friend' pk=friend.pk %}">
-      		<h2>{{ friend.username }}</h2>
-          <!-- <h2>{{ friend.pk }}</h2> -->
-      	</a>
-      {% endfor %}
       <br>
+    
+      <h1>Amount they owe</h1>
+      {% for key,value in owed_dict.items %}<h2><a href="{% url 'dappx:view_friend' pk=key.pk %}">{{ key }}</a> - {{ value }}</h2>{% endfor %}
+      <h1>Amount I owe</h1>
+      {% for key,value in owe_dict.items %}<h2><a href="{% url 'dappx:view_friend' pk=key.pk %}">{{ key }}</a> - {{ value }}</h2>{% endfor %}
+      {% for no_friend in nothing_friend_list %}
+        <h2><a href="{% url 'dappx:view_friend' pk=no_friend.pk %}">{{ no_friend }}</a> - 0 </h2>
+      {% endfor %}
       <form method="post" action="{% url 'dappx:addfriends' %}">
-          {% csrf_token %}<!-- 
-          {{ addfriend_form.as_p }} -->
+          {% csrf_token %}
           <label for="Friendsl">Friends:</label>
           <input type="text" name="Friendsl" placeholder="Friends">
           <br>

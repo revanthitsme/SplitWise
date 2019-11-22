@@ -77,5 +77,5 @@ class ftoftransaction(models.Model):
 	Damount = models.IntegerField(default=0)
 	Description = models.CharField(max_length=50)
 	Group = models.CharField(max_length=18)
-	Time1 = models.DateTimeField(auto_now=True)
+	Time1 = models.DateTimeField(auto_now_add=True)
 	Time2 = models.DateTimeField(auto_now=True)
