@@ -17,5 +17,8 @@ urlpatterns=[
     url(r'^Groups/$', views.Groups, name='Groups'),
     url(r'^Transactions/$', views.Transactions, name='Transactions'),
     url(r'^addfriends/$', views.addfriends, name='addfriends'),
-    url(r'^connect/(?P<operation>.+)/(?P<pk>\d+)/$', views.change_friends, name='change_friends'),
+    #url(r'^connect/(?P<operation>.+)/(?P<pk>\d+)/$', views.change_friends, name='change_friends'),
+    url(r'^view_friend/(?P<pk>\d+)/$', views.view_friend, name='view_friend'),
+    url(r'^settle_up/(?P<pk>\d+)/$', views.settle_up, name='settle_up')
+    # url(r'^ftoftransaction/$',views.ftoftransaction, name='ftoftransaction')
 ]

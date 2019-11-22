@@ -5,9 +5,10 @@
 # admin.site.register(UserProfile)
 
 from django.contrib import admin
-from dappx.models import UserProfileInfo, User, Transaction, Friends
+from dappx.models import UserProfileInfo, User, Transaction, Friends, ftoftransaction
 # Register your models here.
 
 admin.site.register(UserProfileInfo)
 admin.site.register(Transaction)
 admin.site.register(Friends)
+admin.site.register(ftoftransaction)

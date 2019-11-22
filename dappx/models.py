@@ -53,7 +53,7 @@ class Transaction(models.Model):
 # 	Friendslist = models.ManyToManyField(User,related_name='Friendslist')
 
 class Friends(models.Model):
-	Friendslist = models.ManyToManyField(User)
+	Friendslist = models.ManyToManyField(User) 
 	current_user = models.ForeignKey(User,related_name='owner',on_delete=models.CASCADE,null=True)
 
 	@classmethod
@@ -69,3 +69,13 @@ class Friends(models.Model):
 			current_user=current_user
 		)
 		friends.Friendslist.remove(new_friend)
+
+class ftoftransaction(models.Model):
+	Donor = models.ForeignKey(User,related_name='Donor1',on_delete=models.CASCADE)
+	Receiver = models.ForeignKey(User,related_name='Receiver1',on_delete=models.CASCADE)
+	Amount = models.IntegerField(default=0)
+	Damount = models.IntegerField(default=0)
+	Description = models.CharField(max_length=50)
+	Group = models.CharField(max_length=18)
+	Time1 = models.DateTimeField(auto_now=True)
+	Time2 = models.DateTimeField(auto_now=True)

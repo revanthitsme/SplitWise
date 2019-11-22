@@ -8,7 +8,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
-from dappx.models import Transaction, Friends
+from dappx.models import Transaction, Friends, ftoftransaction
 
 # Create your views here.
 
@@ -164,7 +164,7 @@ def Transactions(request):
         ## DONT DELETE ##
         #Receiver1 = User.objects.get(username=Receiver).pk
         #Receiver2= User.objects.get(id=Receiver1) 
-        ###for invalid users an repititon
+        ###for invalid users and repititon
         if len(Receivers) == len(set(Receivers)) :
             for Receiver in Receivers:
                 try:
@@ -173,11 +173,19 @@ def Transactions(request):
                     return render(request, 'dappx/Transactions.html',{'NoReceivers': True})
         else:
             return render(request, 'dappx/Transactions.html',{'DupReceivers': True})
-            
+
+        for Receiver1 in Receivers:
+            new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
+            Friends.make_friend(request.user, new_friend)
+            Friends.make_friend(new_friend, request.user)
+            amounteach = int(Amount)/(len(Receivers)+1)
+            #Assumption: FtoFTransactions is valid
+            ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+            ftoftransaction_form.save()
+
         Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
         Transactions_form.save()
-        return render(request, 'dappx/test.html',{'test_var1':Receivers,
-                                                    'test_var2':Transactions_form.Date})
+        return render(request, 'dappx/usermain.html')
         if Transactions_form.is_valid():
 
             transactions = transcations_form.save()
@@ -220,15 +228,54 @@ def addfriends(request):
         
         friendobj = Friends.objects.get(current_user=request.user)
         friends_of_curr_user = friendobj.Friendslist.all()
-        return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
-                                                    })
+    return Friendstab(request)
+        # return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
+        #                                             })
 
-def change_friends(request,operation,pk):
-    friend = User.objects.get(id=pk)
-    if operation == 'add':
-        Friends.make_friend(request.user, friend)
-    elif operation == 'remove':
-        Friend.lose_friend(request.user, friend)
+# def change_friends(request,operation,pk):
+#     friend = User.objects.get(id=pk)
+#     if operation == 'add':
+#         Friends.make_friend(request.user, friend)
+#     elif operation == 'remove':
+#         Friend.lose_friend(request.user, friend)
 
-    return render(request, 'dappx/Friends.html')
+#     return render(request, 'dappx/Friends.html')
     
+def view_friend(request, pk):
+    Friend2 = User.objects.get(id=pk)
+    friend_username = Friend2.username
+    friendid = pk
+    userid = request.user.pk
+    username = request.user.username
+
+    ##friend owes how much
+    transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid)
+    #transactions = Transaction.objects.all()
+    ####
+    ##how much does user owe to friend
+    transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid)
+    for transaction1 in transactions:
+        print(transaction1)
+
+    return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend2})
+
+def settle_up(request, pk):
+    Friend3 = User.objects.get(id=pk)
+    friend_username = Friend3.username
+    friendid = pk
+    userid = request.user.pk
+    username = request.user.username
+
+    ##friend owes how much
+    #transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid).update(Amount=0)
+    transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid)
+    for transaction in transactions:
+        transaction.Amount = 0
+        transaction.save()
+    ##how much does user owe to friend
+    #transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid).update(Amount=0)
+    transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid)
+    for transaction in transactions1:
+        transaction.Amount = 0
+        transaction.save()
+    return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend3})
