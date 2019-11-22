@@ -315,4 +315,5 @@ def settle_up(request, pk):
         transaction.save()
     return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend3})
 
-#def totsum(request,pk):
+def creategroup(request):
+    return render(request, 'dappx/Groups.html')

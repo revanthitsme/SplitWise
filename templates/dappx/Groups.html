@@ -3,6 +3,15 @@
   <div class="container">
     <div class="jumbotron">
       <h1>Here are your groups.</h1>
+      <form method="post" action="{% url 'dappx:creategroup' %}">
+          {% csrf_token %}
+          <label for="group_name">Group name:</label>
+          <input type="text" name="group_name" placeholder="group_name">
+          <br>
+          <label for="gfriends">Friends:</label>
+          <input type="text" name="gfriends" placeholder="gfriends">
+          <input type="submit" name="" value="Create">
+        </form>
     </div>
   </div>
 {% endblock %}
