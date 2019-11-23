@@ -20,6 +20,8 @@ urlpatterns=[
     #url(r'^connect/(?P<operation>.+)/(?P<pk>\d+)/$', views.change_friends, name='change_friends'),
     url(r'^creategroup/$', views.creategroup, name='creategroup'),
     url(r'^view_friend/(?P<pk>\d+)/$', views.view_friend, name='view_friend'),
-    url(r'^settle_up/(?P<pk>\d+)/$', views.settle_up, name='settle_up')
+    url(r'^settle_up/(?P<pk>\d+)/$', views.settle_up, name='settle_up'),
+    url(r'^notifications/$',views.notifications,name='Notifications'),
+    url(r'^send_notification/(?P<pk>\d+)/$',views.send_notification,name='send_notification')
     # url(r'^ftoftransaction/$',views.ftoftransaction, name='ftoftransaction')
 ]

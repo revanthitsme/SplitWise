@@ -1,0 +1,18 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+<div class="container">
+    <div class="jumbotron">
+    	 <h2>Here are your notifications</h2>
+    	 <h2>UNREAD NOTIFICATIONS</h2>
+    	{% for message in unotifications_unseen %}
+    	<h2>{{message.Sender}}-{{message.message}}</h2>
+    	{% endfor %}
+      <br>
+      <h2>READ NOTIFICATIONS</h2>
+      {% for message in unotifications_seen %}
+    	<h2>{{message.Sender}}-{{message.message}}</h2>
+    	{% endfor %}
+
+    	</div>
+    </div>
+{% endblock %}

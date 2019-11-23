@@ -73,9 +73,17 @@ class Friends(models.Model):
 class ftoftransaction(models.Model):
 	Donor = models.ForeignKey(User,related_name='Donor1',on_delete=models.CASCADE)
 	Receiver = models.ForeignKey(User,related_name='Receiver1',on_delete=models.CASCADE)
+	Tag = models.CharField(max_length=15,default="Others")
 	Amount = models.IntegerField(default=0)
 	Damount = models.IntegerField(default=0)
 	Description = models.CharField(max_length=50)
 	Group = models.CharField(max_length=18)
 	Time1 = models.DateTimeField(auto_now_add=True)
 	Time2 = models.DateTimeField(auto_now=True)
+
+
+class notificationsModel(models.Model):
+	Sender = models.ForeignKey(User,related_name='sender1',on_delete=models.CASCADE)
+	Receiver = models.ForeignKey(User,related_name='Receiver2',on_delete=models.CASCADE)
+	message = models.CharField(max_length=50)
+	seen = models.IntegerField(default=0)

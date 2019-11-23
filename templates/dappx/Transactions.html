@@ -13,10 +13,13 @@
           <input type="text" name="Donor" placeholder="Donor">
           <br> -->
           {% if DupReceivers %}
-          <h3>there's a repition </h3>
+          <h3>there's a repitition </h3>
           {% endif %}
           {% if NoReceivers %}
           <h3>User doesn't exist</h3>
+          {% endif %}
+          {% if Tag_not_approved %}
+          <h4> **Tag is not approved</h4>
           {% endif %}
           <label for="Receiver">Receiver:</label>
           <input type="text" name="Receiver" placeholder="Receiver">
@@ -27,6 +30,7 @@
           <label for="Description">Description:</label>
           <input type="text" name="Description" placeholder="Description">
           <br>
+          <h4> Choose one from Movies,Food,Housing,Travel,Others(case sensitive)</h4>
           <label for="Tag">Tag:</label>
           <input type="" name="Tag">
           <input type="submit" name="" value="Transactions">

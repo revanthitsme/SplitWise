@@ -6,6 +6,9 @@
       <a href="{% url 'dappx:settle_up' pk=friend.pk %}">
         <button>Settle Up</button>
       </a>
+      <a href="{% url 'dappx:send_notification' pk=friend.pk %}">
+        <button>Send Notification</button>
+      </a>
       <h2>Group name - Amount he owes</h2>
       {% for transaction in transactions %}
       	{% if transaction.Amount %}

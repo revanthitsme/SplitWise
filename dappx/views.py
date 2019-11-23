@@ -8,14 +8,18 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
-from dappx.models import Transaction, Friends, ftoftransaction
+from dappx.models import Transaction, Friends, ftoftransaction, notificationsModel
 from django.db.models import Avg, Count, Min, Sum
 # Create your views here.
-
+#notifications_num = 0
 def index(request):
 	return render(request,'dappx/index.html')
 
 def usermain(request):
+    user = request.user
+    # messages_objects_unseen = notificationsModel.objects.filter(Receiver=user,seen=0)
+    # x = len(messages_objects_unseen)
+    # notifications_num = x
     return render(request,'dappx/usermain.html')
 
 @login_required
@@ -210,11 +214,14 @@ def Transactions(request):
         Receivers = Receiver.split(',')
         Amount = request.POST.get('Amount')
         Description = request.POST.get('Description')
+        Tag = request.POST.get('Tag')
         user = User.objects.get(id=request.user.id)
         ## DONT DELETE ##
         #Receiver1 = User.objects.get(username=Receiver).pk
         #Receiver2= User.objects.get(id=Receiver1) 
         ###for invalid users and repititon
+        ##creating only Tags as shown movies, food, housing, travel, others
+        Tags_approved = ["Movies","Food","Housing","Travel","Others"]
         if len(Receivers) == len(set(Receivers)) :
             for Receiver in Receivers:
                 try:
@@ -224,32 +231,36 @@ def Transactions(request):
         else:
             return render(request, 'dappx/Transactions.html',{'DupReceivers': True})
 
-        for Receiver1 in Receivers:
-            new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
-            Friends.make_friend(request.user, new_friend)
-            Friends.make_friend(new_friend, request.user)
-            amounteach = int(Amount)/(len(Receivers)+1)
-            #Assumption: FtoFTransactions is valid
-            if int(Amount)>=0:
-                ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
-                pass
+        if Tag in Tags_approved:
+            for Receiver1 in Receivers:
+                new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
+                Friends.make_friend(request.user, new_friend)
+                Friends.make_friend(new_friend, request.user)
+                amounteach = int(Amount)/(len(Receivers)+1)
+                #Assumption: FtoFTransactions is valid
+                if int(Amount)>=0:
+                    ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+                    pass
+                else:
+                    ftoftransaction_form = ftoftransaction(Donor=new_friend,Receiver=user,Amount=abs(amounteach),Damount=abs(amounteach),Description=Description,Group=Groups)
+                #ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+                ftoftransaction_form.save()
+
+            Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
+            Transactions_form.save()
+            return redirect('usermain')
+            if Transactions_form.is_valid():
+
+                transactions = transcations_form.save()
+                transactions.save()
             else:
-                ftoftransaction_form = ftoftransaction(Donor=new_friend,Receiver=user,Amount=abs(amounteach),Damount=abs(amounteach),Description=Description,Group=Groups)
-            #ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
-            ftoftransaction_form.save()
-
-        Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description)
-        Transactions_form.save()
-        return render(request, 'dappx/usermain.html')
-        if Transactions_form.is_valid():
-
-            transactions = transcations_form.save()
-            transactions.save()
+                print(Transactions_form.errors)
         else:
-            print(Transactions_form.errors)
+            return render(request,'dappx/Transactions.html',{'Tag_not_approved': True})
+                
     else:
         transcations_form = TransactionsForm(data=request.POST)
-    return render(request, 'dappx/Transactions.html')
+        return render(request, 'dappx/Transactions.html')
 
 
 def addfriends(request):
@@ -317,3 +328,42 @@ def settle_up(request, pk):
 
 def creategroup(request):
     return render(request, 'dappx/Groups.html')
+
+def notifications(request):
+    user = request.user
+    messages_objects = notificationsModel.objects.filter(Receiver=user)
+    messages_objects_unseen = notificationsModel.objects.filter(Receiver=user,seen=0)
+    messages_objects_seen = notificationsModel.objects.filter(Receiver=user,seen=1)
+    x = len(messages_objects_unseen)
+    # for messobj in messages_objects_unseen:
+    #     print(messobj.seen)
+    # for messobj in messages_objects_seen:
+    #     print(messobj.seen)
+
+    for messobj in messages_objects:
+        #messages.append(messobj.message)
+        messobj.seen = 1
+        messobj.save()
+    # for messobj in messages_objects:
+    #     print(messobj.seen)
+    return render(request, 'dappx/notifications.html',{'unotifications_seen':messages_objects_seen,'unotifications_unseen':messages_objects_unseen})
+
+def send_notification(request,pk):
+    if request.method == 'POST':
+        message = request.POST.get('Message')
+        friend = User.objects.get(id=pk)
+        #print(message)
+        #if message is "":
+        #    print("None")
+        if(message is ""):
+            return render(request,'dappx/send_notification.html',{'no_message':True,'friend':friend})
+        else:
+            notification_object = notificationsModel(Sender=request.user,Receiver=friend,message=message,seen=0)
+            notification_object.save()
+            return redirect('usermain')
+
+    else:
+        friend = User.objects.get(id=pk)
+        return render(request,'dappx/send_notification.html',{'friend':friend})
+
+
