@@ -1,0 +1,13 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+		<h1>The Members in the {{ group }} group are</h1> 
+		{% for key,value in members_dict.items %}
+		<h2>
+			<a href="">{{ key }}</a> - {{ value }}
+		</h2>
+		{% endfor %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
 from django_mysql.models import ListCharField
 
 # Create your models here.
@@ -23,7 +23,7 @@ class UserProfileInfo(models.Model):
 
 
 class Transaction(models.Model):
-	Groups = models.CharField(max_length=18)
+	Groups = models.CharField(max_length=20)
 
 	Donor = models.ForeignKey(User,related_name='Donor',on_delete=models.CASCADE)
 
@@ -40,17 +40,19 @@ class Transaction(models.Model):
 
 	Amount = models.IntegerField(default=0)
 
+	# SplitAmount = models.ListCharField(
+	# 	base_field = models.IntegerField(max_length=18),
+ #        size=10,
+ #        max_length=(18 * 11),  # 18 * 10 character nominals, plus commas
+ #        default = []
+ #    )
+
 	Tag = models.CharField(max_length=15)
 
-	Date = models.DateTimeField(auto_now=True)
+	Date = models.DateTimeField(auto_now_add=True)
 
 
 #####################
-
-
-# class Friends(models.Model):
-# 	Friendof = models.ForeignKey(User,related_name='Friendof',on_delete=models.CASCADE)
-# 	Friendslist = models.ManyToManyField(User,related_name='Friendslist')
 
 class Friends(models.Model):
 	Friendslist = models.ManyToManyField(User) 
@@ -73,14 +75,23 @@ class Friends(models.Model):
 class ftoftransaction(models.Model):
 	Donor = models.ForeignKey(User,related_name='Donor1',on_delete=models.CASCADE)
 	Receiver = models.ForeignKey(User,related_name='Receiver1',on_delete=models.CASCADE)
-	Tag = models.CharField(max_length=15,default="Others")
 	Amount = models.IntegerField(default=0)
 	Damount = models.IntegerField(default=0)
 	Description = models.CharField(max_length=50)
-	Group = models.CharField(max_length=18)
+	Group = models.CharField(max_length=20)
+	Tag = models.CharField(max_length=15,default="other")
 	Time1 = models.DateTimeField(auto_now_add=True)
 	Time2 = models.DateTimeField(auto_now=True)
 
+
+class GroupsModel(models.Model):
+	Group = models.CharField(max_length=20)
+	Member = models.ForeignKey(User,related_name='Member',on_delete=models.CASCADE)
+	Amount = models.IntegerField(default=0)
+	Damount = models.IntegerField(default=0)
+	Description = models.CharField(max_length=50)
+	Tag = models.CharField(max_length=15,default="other")
+	in_group = models.BooleanField(default=True)
 
 class notificationsModel(models.Model):
 	Sender = models.ForeignKey(User,related_name='sender1',on_delete=models.CASCADE)

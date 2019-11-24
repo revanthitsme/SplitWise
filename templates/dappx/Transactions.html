@@ -13,13 +13,19 @@
           <input type="text" name="Donor" placeholder="Donor">
           <br> -->
           {% if DupReceivers %}
-          <h3>there's a repitition </h3>
+          <h3>there's a repition </h3>
           {% endif %}
           {% if NoReceivers %}
           <h3>User doesn't exist</h3>
           {% endif %}
-          {% if Tag_not_approved %}
-          <h4> **Tag is not approved</h4>
+          {% if not_total %}
+          <h3>The Group Members are different from Receivers u gave</h3>
+          <h3>The Group Members are:</h3>
+          {% for member in gp_Members %}
+          {% ifnotequal member user %}
+          <h4>{{ member }}</h4>
+          {% endifnotequal %}
+          {% endfor %}
           {% endif %}
           <label for="Receiver">Receiver:</label>
           <input type="text" name="Receiver" placeholder="Receiver">
@@ -30,7 +36,6 @@
           <label for="Description">Description:</label>
           <input type="text" name="Description" placeholder="Description">
           <br>
-          <h4> Choose one from Movies,Food,Housing,Travel,Others(case sensitive)</h4>
           <label for="Tag">Tag:</label>
           <input type="" name="Tag">
           <input type="submit" name="" value="Transactions">
