@@ -1,0 +1,31 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+		<h1>The Members in the {{ group }} group are</h1> 
+		<h3>Transactions in Group</h3>
+		{% for obj in Activities %}
+		-----------------------------------------
+		<br>
+		{{ obj.Donor }}(Donor) gave {{ obj.Amount }}(Amount) to {{ obj.Receivers_list }}(Receivers list)
+		<br>
+		{{ obj.Time }}(time)
+		<br>
+		{{ obj.Description }}(Description)
+		<br>
+		{{ obj.Tag }}(Tag)
+		<br>
+		-----------------------------------------
+		{% endfor %}
+
+		{% for key,value in members_dict.items %}
+		<h2>
+			<a href="">{{ key }}</a> - {{ value }}
+		</h2>
+			<a href="{% url 'dappx:settle_up_in_group' operation=group pk=key.pk %}">
+        		<button>Settle Up</button>
+      		</a>
+		{% endfor %}
+    </div>
+  </div>
+{% endblock %}

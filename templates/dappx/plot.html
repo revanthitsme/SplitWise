@@ -15,7 +15,7 @@ function myFunction() {
 	{% block content %}
 	{{ excel | safe}}
 	{% endblock %}
-	
+
 </div>
 <script src="https://code.highcharts.com/highcharts.src.js"></script>
 <script>
@@ -33,8 +33,3 @@ function myFunction() {
 <script>
 	let chart4 = Highcharts.chart('container4', {{ chart4|safe }})
 </script>
-
-
-
-
-	

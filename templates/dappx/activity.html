@@ -1,0 +1,24 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+<div class="container">
+    <div class="jumbotron">
+      <h1>Here are your Activities.</h1>
+      
+      {% for obj in Activities %}
+      -----------------------------------------
+      <h3>{{ obj.Button_name }}</h3>
+      {{ obj.Donor }}(Donor) gave {{ obj.Amount }}(Amount) to {{ obj.Receivers_list }}(Receivers list)
+		<br>
+		{{ obj.Time }}(time)
+		<br>
+		{{ obj.Group_name }}(Group)
+		<br>
+		{{ obj.Description }}(Description)
+		<br>
+		{{ obj.Tag }}(Tag)
+		<br>
+		-----------------------------------------
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
