@@ -12,9 +12,6 @@
       {% for no_friend in nothing_friend_list %}
         <h2><a href="{% url 'dappx:view_friend' pk=no_friend.pk %}">{{ no_friend }}</a> - 0 </h2>
       {% endfor %}
-      {% if no_exists %}
-      <h2>User doesn't exist Try again!</h2>
-      {% endif %}
       <form method="post" action="{% url 'dappx:addfriends' %}">
           {% csrf_token %}
           <label for="Friendsl">Friends:</label>

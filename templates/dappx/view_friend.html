@@ -12,7 +12,7 @@
       <h2>Group name - Amount he owes</h2>
       {% for transaction in transactions %}
       	{% if transaction.Amount %}
-        <a href="{% url 'dappx:view_group' operation=transaction.Group %}">
+        <a href="">
       		<h2 >{{ transaction.Group }} - {{ transaction.Amount }}</h2>
       	</a>
         {% endif %}

@@ -3,36 +3,8 @@
   <div class="container">
     <div class="jumbotron">
       <h1>Here are your groups.</h1>
-      {% for group in groups %}
-      <a href="{% url 'dappx:view_group' operation=group.Group %}"><h3>{{ group.Group }} {{ group.Amount }}</h3></a>
-      {% if cannot_settle %}
-      <h4>Cannot Leave Not Settled Yet</h4>
-      {% endif %}
-
-      {% if group.Amount %}
-      <h4>Group owes you {{ group.Amount }}</h4>
-      {% else %}
-      <h4>You owe {{ group.Amount }} to Group</h4>
-      {% endif %}
-        <a href="{% url 'dappx:Leave_group' operation1=group.Group %}">
-          <button>Leave</button>
-        </a>
-      {% endfor %}
-      <br>
       <form method="post" action="{% url 'dappx:creategroup' %}">
           {% csrf_token %}
-          {% if create_group %}
-          <h3>This Group doesn't exist!! Create it First</h3>
-          {% endif %}
-          {% if DupFriends %}
-          <h3>there's a repition </h3>
-          {% endif %}
-          {% if NoFriend %}
-          <h3>User doesn't exist</h3>
-          {% endif %}
-          {% if Exists %}
-          <h3>Groupname already used</h3>
-          {% endif %}
           <label for="group_name">Group name:</label>
           <input type="text" name="group_name" placeholder="group_name">
           <br>

@@ -1,0 +1,24 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+<div class="container">
+    <div class="jumbotron">
+    	<form method="post" action="{% url 'dappx:tagplots' %}">
+  		{% csrf_token %}
+  		<h3>please enter the dates</h3>
+  		{% if not_entered %}
+  		<h4>*please select the dates</h4>
+  		{% endif %}
+  		<label for="From">From:</label>
+  		<input type="date" name="From">
+  		<br>
+  		<label for="To">To:</label>
+  		<input type="date" name="To">
+  		<!-- <br>
+  		<label for="Tag">Tag:</label>
+  		<input type="" name="Tag"> -->
+        <input type="submit" name="" value="inputs">
+		</form>
+
+    	</div>
+    </div>
+{% endblock %}

@@ -8,14 +8,22 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib import messages
-from dappx.models import Transaction, Friends, ftoftransaction, GroupsModel, notificationsModel
+from dappx.models import Transaction, Friends, ftoftransaction, notificationsModel
 from django.db.models import Avg, Count, Min, Sum
+import json
+from django.core import serializers
+import csv
+import pandas as pd
 # Create your views here.
-
+#notifications_num = 0
 def index(request):
 	return render(request,'dappx/index.html')
 
 def usermain(request):
+    user = request.user
+    # messages_objects_unseen = notificationsModel.objects.filter(Receiver=user,seen=0)
+    # x = len(messages_objects_unseen)
+    # notifications_num = x
     return render(request,'dappx/usermain.html')
 
 @login_required
@@ -72,7 +80,7 @@ def update_pic(request):
     return render(request, 'dappx/update_pic.html', context)
 
 
-
+@login_required
 def register(request):
     registered = False
     if request.method == 'POST':
@@ -103,6 +111,7 @@ def register(request):
                            'registered':registered})
 
 ###########
+@login_required
 def user_login(request):
 	if request.method == 'POST':
 		username = request.POST.get('username')
@@ -122,7 +131,8 @@ def user_login(request):
 		return render(request, 'dappx/login.html', {})
 
 #####################################
-def amount_of_each(request, friendslist, not_exists):
+@login_required
+def amount_of_each(request, friendslist):
     amount_list = []
     owed_list = []
     owed_friend_list = []
@@ -183,46 +193,28 @@ def amount_of_each(request, friendslist, not_exists):
     for i in range(len(owe_list)):
         print(i, end='  ')
     print("")
-    return render(request, 'dappx/Friends.html',
-                                    {'owed_dict':owed_dict,'owe_dict':owe_dict,'no_exists':not_exists,
-                                    'owe_list':owe_list,'owe_friend_list':owe_friend_list,
-                                    'owed_list':owed_list,'owed_friend_list':owed_friend_list,
-                                    'nothing_friend_list':nothing_friend_list,'friends':friends_of_curr_user})
+    return render(request, 'dappx/Friends.html',{'owed_dict':owed_dict,'owe_dict':owe_dict,'owe_list':owe_list,'owe_friend_list':owe_friend_list,
+            'owed_list':owed_list,'owed_friend_list':owed_friend_list,'nothing_friend_list':nothing_friend_list,'friends':friends_of_curr_user})
 
 
 
 #####################################
+@login_required
 def Friendstab(request):
     friendobj = Friends.objects.get_or_create(current_user=request.user)
     friends_of_curr_user = friendobj[0].Friendslist.all()
-    amount_list = amount_of_each(request, friends_of_curr_user, False)
-    return amount_of_each(request, friends_of_curr_user, False)
+    amount_list = amount_of_each(request, friends_of_curr_user)
+    return amount_of_each(request, friends_of_curr_user)
     return render(request, 'dappx/Friends.html',{'friends':friends_of_curr_user,
                                                     })
 
 #####################################
+@login_required
 def Groups(request):
-    ftoftransactions_debt = ftoftransaction.objects.filter(Donor=request.user)
-    all_groups = GroupsModel.objects.filter(Member=request.user,in_group=True)
-    group_names = [Group3.Group for Group3 in all_groups]
-    #x = GroupsModel.objects.get(Group=group_names[0])
-    #return render(request, )
-    print(all_groups)
-    group_names = set(group_names)
-    print(group_names)
-    try:
-        group_names.remove('')
-    except Exception as e:
-        pass
-    # print(group_names)
-    unique_groups = [Group4 for Group4 in all_groups if Group4.Group in group_names]
-    print(unique_groups)
-    ###### WON'T PRINT AMOUNT IN GROUPS_TAB Separate function to be created #######
-    args = {'debt_group_objs':ftoftransactions_debt,'groups':set(unique_groups)}
-    return render(request, 'dappx/Groups.html',args)
+    return render(request, 'dappx/Groups.html')
 
 #####################################
-
+@login_required
 def Transactions(request):
     if request.method == 'POST':
         Groups = request.POST.get('Group') 
@@ -232,41 +224,12 @@ def Transactions(request):
         Description = request.POST.get('Description')
         Tag = request.POST.get('Tag')
         user = User.objects.get(id=request.user.id)
-
-        ## CHECK WHETHER IF GROUP EXISTS ##
-        Groups_exi = GroupsModel.objects.filter(Member_id=request.user.pk,in_group=True)
-        # Groups_exi = GroupsModel.objects.all()
-        Groups_names = [Group1.Group for Group1 in Groups_exi]
-        print(Groups_names)
-        print(Groups_names)
-        if Groups not in Groups_names or Groups is '' :
-            return render(request, 'dappx/Groups.html',{'create_group':True})
-
-        ## CHECKING WHETHER GROUP MEMBERS ARE SAME : RECEIVERS AND USER ##
-        gp_Members_obj = GroupsModel.objects.filter(Group=Groups,in_group=True)
-        gp_Members = [Group2.Member.username for Group2 in gp_Members_obj if Group2.Member != request.user]
-        print(gp_Members)
-        print(Receivers)
-        if set(gp_Members) != set(Receivers):
-            return render(request, 'dappx/Transactions.html',{'not_total':True,'gp_Members':gp_Members,'username':request.user.username})
-
-        ## ADDING ## UPDATING Request User to group ##
-        amounteach = int(Amount)/(len(Receivers)+1)
-        amount_user = int(Amount) - amounteach
-        Group_obj1 = GroupsModel.objects.filter(Group=Groups,Member=user,in_group=True)
-        Group_obj1 = Group_obj1[0]
-        Group_obj1.Amount = Group_obj1.Amount + amount_user
-        Group_obj1.Description = Description
-        Group_obj1.Tag = Tag
-        Group_obj1.save()
-        # Group_obj = GroupsModel(Group=Groups,Member=user,Amount=amount_user,Damount=amount_user,Description=Description,Tag=Tag)
-        # Group_obj.save() ## IMPORTANT
-
         ## DONT DELETE ##
         #Receiver1 = User.objects.get(username=Receiver).pk
-        #Receiver2= User.objects.get(id=Receiver1)
-
+        #Receiver2= User.objects.get(id=Receiver1) 
         ###for invalid users and repititon
+        ##creating only Tags as shown movies, food, housing, travel, others
+        Tags_approved = ["Movies","Food","Housing","Travel","Others"]
         if len(Receivers) == len(set(Receivers)) :
             for Receiver in Receivers:
                 try:
@@ -276,65 +239,51 @@ def Transactions(request):
         else:
             return render(request, 'dappx/Transactions.html',{'DupReceivers': True})
 
-        for Receiver1 in Receivers:
-            new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
-            Friends.make_friend(request.user, new_friend)
-            Friends.make_friend(new_friend, request.user)
-            
-            #Assumption: FtoFTransactions is valid
-            if int(Amount)>=0:
-                ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups,Tag=Tag)
+        if Tag in Tags_approved:
+            for Receiver1 in Receivers:
+                new_friend = User.objects.get(id=User.objects.get(username=Receiver1).pk)
+                Friends.make_friend(request.user, new_friend)
+                Friends.make_friend(new_friend, request.user)
+                amounteach = int(Amount)/(len(Receivers)+1)
+                #Assumption: FtoFTransactions is valid
+                if int(Amount)>=0:
+                    ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+                    pass
+                else:
+                    ftoftransaction_form = ftoftransaction(Donor=new_friend,Receiver=user,Amount=abs(amounteach),Damount=abs(amounteach),Description=Description,Group=Groups)
+                #ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
+                ftoftransaction_form.save()
+
+            Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description,Expenditure=abs(amounteach))
+            Transactions_form.save()
+            return redirect('usermain')
+            if Transactions_form.is_valid():
+
+                transactions = transcations_form.save()
+                transactions.save()
             else:
-                ftoftransaction_form = ftoftransaction(Donor=new_friend,Receiver=user,Amount=abs(amounteach),Damount=abs(amounteach),Description=Description,Group=Groups,Tag=Tag)
-            #ftoftransaction_form = ftoftransaction(Donor=user,Receiver=new_friend,Amount=amounteach,Damount=amounteach,Description=Description,Group=Groups)
-            ftoftransaction_form.save()
-            #### ADDING TO Groups Model
-            negamounteach = -1 * amounteach
-            print(negamounteach)
-            Group_obj2 = GroupsModel.objects.filter(Group=Groups,Member=new_friend,in_group=True)
-            Group_obj2 = Group_obj2[0]
-            Group_obj2.Amount = Group_obj2.Amount + negamounteach
-            print(Group_obj2.Amount)
-            Group_obj2.Description = Description
-            Group_obj2.Tag = Tag
-            Group_obj2.save()
-            # Group_obj = GroupsModel(Group=Groups,Member=new_friend,Amount=negamounteach,Damount=negamounteach,Description=Description,Tag=Tag)
-            # Group_obj.save()
-
-        Transactions_form = Transaction(Groups=Groups,Donor=user,Receivers=Receivers,Amount=Amount,Description=Description,Tag=Tag)
-        Transactions_form.save()
-        ## ACTIVITY OF TRANSACTIONS USE TRANSACTIONS ##
-        return render(request, 'dappx/usermain.html')
-        if Transactions_form.is_valid():
-
-            transactions = transcations_form.save()
-            transactions.save()
+                print(Transactions_form.errors)
         else:
-            print(Transactions_form.errors)
+            return render(request,'dappx/Transactions.html',{'Tag_not_approved': True})
+                
     else:
         transcations_form = TransactionsForm(data=request.POST)
-    return render(request, 'dappx/Transactions.html')
+        return render(request, 'dappx/Transactions.html')
 
-
+@login_required
 def addfriends(request):
     if request.method == 'POST':
         Friends_str = request.POST.get('Friendsl')
         Friendslist = Friends_str.split(',')
-        try:
-            idlist = [User.objects.get(username=Friend).pk for Friend in Friendslist]    
-        except Exception as e:
-            friendobj = Friends.objects.get_or_create(current_user=request.user)
-            friends_of_curr_user = friendobj[0].Friendslist.all()
-            amount_list = amount_of_each(request, friends_of_curr_user, True)
-            return amount_of_each(request, friends_of_curr_user, True)
-
+        idlist = [User.objects.get(username=Friend).pk for Friend in Friendslist]
+        # return render(request, 'dappx/test.html',{'test_var1':idlist})
+        # user = User.objects.get(id=request.user.id)
         for idu in idlist:
             Friend2 = User.objects.get(id=idu)
             Friends.make_friend(request.user, Friend2)
             Friends.make_friend(Friend2, request.user)
-        ## DONT DELETE ##
-        #friendobj = Friends.objects.get(current_user=request.user)
-        #friends_of_curr_user = friendobj.Friendslist.all()
+        friendobj = Friends.objects.get(current_user=request.user)
+        friends_of_curr_user = friendobj.Friendslist.all()
     return Friendstab(request)
 
 # def change_friends(request,operation,pk):
@@ -345,8 +294,7 @@ def addfriends(request):
 #         Friend.lose_friend(request.user, friend)
 
 #     return render(request, 'dappx/Friends.html')
-
-#######
+@login_required    
 def view_friend(request, pk):
     Friend2 = User.objects.get(id=pk)
     friend_username = Friend2.username
@@ -356,77 +304,16 @@ def view_friend(request, pk):
 
     ##friend owes how much
     transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid)
-    
+    #transactions = Transaction.objects.all()
+    ####
     ##how much does user owe to friend
     transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid)
     for transaction1 in transactions:
         print(transaction1)
-    ## ONLY DIFFERENT GROUPS BY SUMMING THE AMOUNTS ##
-    ######
-    ## UPDATING  ##
+
     return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend2})
 
-#######
-def view_group(request, operation):
-    print(type(operation)) ## operation is group name ##
-    #print(operation.Amount)
-    Member_objs = GroupsModel.objects.filter(Group=operation,in_group=True)
-    print(Member_objs)
-    print('view_group')
-    Mem_Am_dict = {}
-    for obj in Member_objs:
-        Mem_Am_dict[obj.Member] = obj.Amount
-    print(Mem_Am_dict)
-    Mem_Am_dict.pop(request.user, None)
-    ### SETTLING IN GROUPS MODEL ###
-
-    return render(request, 'dappx/view_group.html',{'members_dict':Mem_Am_dict,'group':operation})
-##########
-def Leave_group(request, operation1):
-    #print(operation1.Amount)
-    Member_objs = GroupsModel.objects.filter(Group=operation1)
-    group_obj2 = GroupsModel.objects.filter(Group=operation1,Member=request.user)
-    group_obj2 = group_obj2[0]
-    print(Member_objs)
-    print(type(group_obj2.Amount))
-    print("dfghjklknb")
-    #print(operation)
-    #print(type(operation))
-    #print(request.user)
-    Amount1 = group_obj2.Amount
-    print(Amount1)
-    print(type(Amount1))
-    print(Amount1 == 0)
-    if Amount1 != 0:
-        ftoftransactions_debt = ftoftransaction.objects.filter(Donor=request.user)
-        all_groups = GroupsModel.objects.filter(Member=request.user,in_group=True)
-        group_names = [Group3.Group for Group3 in all_groups]
-        group_names = set(group_names)
-        try:
-            group_names.remove('')
-        except Exception as e:
-            pass
-        unique_groups = [Group4 for Group4 in all_groups if Group4.Group in group_names]
-        args = {'debt_group_objs':ftoftransactions_debt,'groups':set(unique_groups),'cannot_settle':True}
-        return render(request, 'dappx/Groups.html',args)
-    else:
-        print(group_obj2.Member)
-        print(group_obj2.Amount)
-        group_obj2.in_group = False
-        group_obj2.save()
-        ftoftransactions_debt = ftoftransaction.objects.filter(Donor=request.user)
-        all_groups = GroupsModel.objects.filter(Member=request.user,in_group=True)
-        group_names = [Group3.Group for Group3 in all_groups]
-        group_names = set(group_names)
-        try:
-            group_names.remove('')
-        except Exception as e:
-            pass
-        unique_groups = [Group4 for Group4 in all_groups if Group4.Group in group_names]
-        args = {'debt_group_objs':ftoftransactions_debt,'groups':set(unique_groups),'cannot_settle':False}
-    return render(request, 'dappx/Groups.html',args)
-
-##########
+@login_required
 def settle_up(request, pk):
     Friend3 = User.objects.get(id=pk)
     friend_username = Friend3.username
@@ -437,82 +324,21 @@ def settle_up(request, pk):
     #transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid).update(Amount=0)
     transactions = ftoftransaction.objects.filter(Donor_id = userid,Receiver_id=friendid)
     for transaction in transactions:
-        #write code here
-        cGroup = transaction.Group
-        amount1 = transaction.Amount
-        cGroup_obj_user = GroupsModel.objects.filter(Member=request.user,Group=cGroup)
-        cGroup_obj_fr = GroupsModel.objects.filter(Member=Friend3,Group=cGroup)
-        cGroup_obj_user = cGroup_obj_user[0]
-        cGroup_obj_fr = cGroup_obj_fr[0]
-        cGroup_obj_user.Amount = cGroup_obj_user.Amount - amount1
-        cGroup_obj_user.save()
-        cGroup_obj_fr.Amount = cGroup_obj_fr.Amount + amount1
-        cGroup_obj_fr.save()
         transaction.Amount = 0
         transaction.save()
     ##how much does user owe to friend
     #transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid).update(Amount=0)
     transactions1 = ftoftransaction.objects.filter(Donor_id = friendid,Receiver_id=userid)
     for transaction in transactions1:
-        #and here
-        cGroup = transaction.Group
-        amount1 = transaction.Amount
-        cGroup_obj_user = GroupsModel.objects.filter(Member=Friend3,Group=cGroup)
-        cGroup_obj_fr = GroupsModel.objects.filter(Member=request.user,Group=cGroup)
-        cGroup_obj_user = cGroup_obj_user[0]
-        cGroup_obj_fr = cGroup_obj_fr[0]
-        cGroup_obj_user.Amount = cGroup_obj_user.Amount - amount1
-        cGroup_obj_user.save()
-        cGroup_obj_fr.Amount = cGroup_obj_fr.Amount + amount1
-        cGroup_obj_fr.save()
         transaction.Amount = 0
         transaction.save()
-     ## UPDATING  ##
     return render(request, 'dappx/view_friend.html',{'transactions1':transactions1, 'transactions':transactions, 'friend':Friend3})
 
+@login_required
 def creategroup(request):
-    if request.method == 'POST':
-        Friends_str = request.POST.get('gfriends')
-        Group_str = request.POST.get('group_name')
-        Friendslist = Friends_str.split(',')
-        user = request.user
-        # groups_obj_all = GroupsModel.objects.filter(Member_id=user.pk)
-        groups_obj_all = GroupsModel.objects.all()
-        for groups_obj in groups_obj_all:
-            if Group_str == groups_obj.Group:
-                print("Already Exists")
-                return render(request, 'dappx/Groups.html',{'Exists': True})
+    return render(request, 'dappx/Groups.html')
 
-        ## ADDING Request User to group
-        Group_obj = GroupsModel(Group=Group_str,Member=user,Amount=0,Damount=0,Description="created a new Group",Tag="creation")
-        Group_obj.save() ## IMPORTANT
-
-        ###for invalid users and repititon
-        if len(Friendslist) == len(set(Friendslist)) :
-            for Friend4 in Friendslist:
-                try:
-                    new_friend = User.objects.get(username=Friend4)
-                    Friend4id = new_friend.pk
-                    #### ADDING TO FToFTransactions ####
-                    transaction0 = ftoftransaction(Donor=user,Receiver=new_friend,Amount=0,Damount=0,Description="created a new Group",Group=Group_str,Tag="creation")
-                    transaction0.save()
-                    #### ADDING TO Groups Model
-                    Group_obj = GroupsModel(Group=Group_str,Member=new_friend,Amount=0,Damount=0,Description="created a new Group",Tag="creation")
-                    Group_obj.save()
-                    ## IF wanted add to transaction table too.
-                    #########
-                except Exception as e:
-                    return render(request, 'dappx/Groups.html',{'NoFriend': True})
-        else:
-            return render(request, 'dappx/Groups.html',{'DupFriends': True})
-
-        idlist = [User.objects.get(username=Friend).pk for Friend in Friendslist]
-        for idu in idlist:
-            Friend2 = User.objects.get(id=idu)
-            Friends.make_friend(request.user, Friend2)
-            Friends.make_friend(Friend2, request.user)
-    return Groups(request)
-
+@login_required
 def notifications(request):
     user = request.user
     messages_objects = notificationsModel.objects.filter(Receiver=user)
@@ -532,6 +358,8 @@ def notifications(request):
         print(messobj.seen)
     return render(request, 'dappx/notifications.html',{'unotifications_seen':messages_objects_seen,'unotifications_unseen':messages_objects_unseen})
 
+
+@login_required
 def send_notification(request,pk):
     if request.method == 'POST':
         message = request.POST.get('Message')
@@ -549,3 +377,279 @@ def send_notification(request,pk):
     else:
         friend = User.objects.get(id=pk)
         return render(request,'dappx/send_notification.html',{'friend':friend})
+
+@login_required
+def time_series_plots(request):
+    return render(request,'dappx/time_series_plots.html')
+
+
+
+@login_required
+def tagplots(request):
+    if request.method == 'POST':
+        fromdate = request.POST.get('From')
+        todate = request.POST.get('To')
+        # Tag = request.POST.get('Tag')
+        if(fromdate=="" or todate==""):
+            return render(request,'dappx/time_series_plots.html',{'not_entered':True})
+        print(fromdate)
+        user = request.user
+        Tags_approved = ["Movies","Food","Housing","Travel","Others"]
+        #########################
+        #for time line series
+        Tag_approved_lists = {}
+        dates_approved_objects2 = Transaction.objects.filter(Date2__gte=fromdate,Date2__lte=todate)
+        dates_approved_objects = []
+        for i in dates_approved_objects2:
+            group_members = i.Receivers
+            group_members.append(i.Donor.username)
+            if user.username in group_members:
+                dates_approved_objects.append(i)
+        dates_approved = []
+        for i in dates_approved_objects:    
+            if i.Date2 in dates_approved:
+                print("happy")
+            else:
+                dates_approved.append(i.Date2)
+        for i in Tags_approved:
+            money_per_tag_per_date = []
+            for j in dates_approved:
+                money=0
+                for k in dates_approved_objects:
+                    if(k.Date2==j and k.Tag==i):
+                        money = money + k.Expenditure
+                money_per_tag_per_date.append(money)
+
+            Tag_approved_lists[i]=money_per_tag_per_date   
+
+        ##############################
+        #data approved objects
+        fields = ['Groups','Donor','Receivers','Description','Amount','Tag','Date','Date2','Expenditure']
+        rows =[]
+        for i in dates_approved_objects:
+            row1 = [i.Groups,i.Donor,i.Receivers,i.Description,i.Amount,i.Tag,i.Date,i.Date2,i.Expenditure]
+            rows.append(row1)
+            
+
+        with open('exceelsheet.csv', 'w') as csvfile: 
+            csvwriter = csv.writer(csvfile) 
+          
+        # writing the fields 
+        #   csvwriter.writerow(fields) 
+          
+        # writing the data rows 
+            csvwriter.writerows(rows)
+            #csvwriter.columns(fields)
+        print(rows)
+        htmlwriter = pd.read_csv('exceelsheet.csv',names=fields)
+        html_str=htmlwriter.to_html()
+        # html_file=open('../templates/dappx/plot.html','a')
+        # html_file.write(html_str)
+        # html_file.close()
+            ####################################
+            # money_per_tag_per_date = []
+            # for i in dates_approved:
+            #     money =0
+            #     for j in dates_approved_objects:
+            #         if (j.Date2==i):
+            #             money = money + j.Expenditure
+            #     money_per_tag_per_date.append(money)
+
+            
+        #for piechart1 (tags,expenditure)
+        
+        Tags_values=[]
+        for Tag1 in Tags_approved:
+            
+
+            objectfortags = Transaction.objects.filter(Tag=Tag1,Date2__gte=fromdate,Date2__lte=todate)
+            
+            money_spent =0
+
+            for obj in objectfortags:
+                group_members = objectfortags.Receivers
+                group_members.append(objectfortags.Donor.username)
+                if user.username in group_members:
+                    money_spent = money_spent + obj.Expenditure
+                    Tags_values.append(money_spent)
+        ###########
+        #for time line series
+        # dates_objects = Transaction.
+        ############
+        #for piechart2 (friends,expenditure)
+        friends_objects1 = ftoftransaction.objects.filter(Donor=request.user,Date2__gte=fromdate,Date2__lte=todate)
+        friends_objects2 = ftoftransaction.objects.filter(Receiver=request.user,Date2__gte=fromdate,Date2__lte=todate)
+        friends_names=list()
+        friends_usernames =[]
+        for i in friends_objects1:
+            if i.Receiver in friends_names:
+                print("happy")
+            else:
+                friends_names.append(i.Receiver)
+                friends_usernames.append(i.Receiver.username)
+        for i in friends_objects2:
+            if i.Donor in friends_names:
+                print("happy")
+            else:
+                friends_names.append(i.Donor) 
+                friends_usernames.append(i.Receiver.username)  
+        money_value_for_friend=list()
+        money_given_by_me = []
+        money_given_by_frnd=[]
+        for i in friends_names:
+            money = 0
+            money1=0
+            money2=0
+            for j in friends_objects1:
+                if(j.Receiver==i):
+                    money = money + j.Damount
+                    money1 = money1 + j.Damount
+            for j in friends_objects2:
+                if(j.Donor==i):
+                    money = money + j.Damount
+                    money2 = money2 + j.Damount
+            money_value_for_friend.append(money)
+            money_given_by_frnd.append(money2)
+            money_given_by_me.append(money1)
+        for i in friends_names:
+            print(i)
+        for i in money_value_for_friend:
+            print(i)
+        ############
+        # groups that frnd is in
+        group_names=[]
+        for i in friends_objects1:
+            if i.Group in group_names:
+                print('happy')
+            else:
+                group_names.append(i.Group)
+        for i in friends_objects2:
+            if i.Group in group_names:
+                print('happy')
+            else:
+                group_names.append(i.Group)
+        money_given_to_group=[]
+        money_given_to_me_by_group=[]
+        for i in group_names:
+            money1=0
+            money2=0
+            for j in friends_objects1:
+                if(j.Group==i):
+                    money1=money1+j.Damount
+            for j in friends_objects2:
+                if(j.Group==i):
+                    money2=money2+j.Damount
+            money_given_to_group.append(money1)
+            money_given_to_me_by_group.append(money2)
+
+
+        ########### 
+        #for stacked  bargraph1 
+        # group_objects = ftoftransaction.objects.filter() 
+        #for piechart1 (tags,expenditure)  
+        chart1 = {
+            'chart':{'type':'pie'},
+            'title':{'text':'pie chart for expenditure with tags'},
+            'series': [{
+                'name':'Total Transaction Amount',
+                'data':list(map(lambda row1,row2:{'name':row1,'y': row2},Tags_approved,Tags_values))
+            }]
+        }
+        ##########
+        ############
+        #for piechart2 (friends,expenditure)
+        chart2 = {
+            'chart':{'type':'pie'},
+            'title':{'text':'pie chart for expenditure with friends'},
+            'series':[{
+                'name':'Total Amount',
+                'data':list(map(lambda row1,row2:{'name':row1,'y':row2},friends_usernames,money_value_for_friend))
+            }]
+        }
+        ################
+        #for chart3(frnd,owed,owe)
+        lent_series = {
+            'name':'lent',
+            'data':money_given_by_me,
+            'color':'blue',
+        }
+        borr_series = {
+            'name':'borrowed',
+            'data':money_given_by_frnd,
+            'color':'red',
+        }
+
+        chart3 = {
+            'chart':{'type':'bar'},
+            'plotOptions' :{
+                'series':{
+                    'stacking':'normal'
+                }
+            },
+            'title':{'text':'Bar Graph For Friends'},
+            'xAxis':{'categories':friends_usernames},
+            'series':[lent_series,borr_series]
+        }
+        ##############
+        #for chart4(group,owed,owe)
+        group_lent_series = {
+            'name':'lent',
+            'data':money_given_to_group,
+            'color':'blue',
+        }
+        group_borr_series = {
+            'name':'borrowed',
+            'data':money_given_to_me_by_group,
+            'color':'red',
+        }
+
+        chart4 = {
+            'chart':{'type':'bar'},
+            'plotOptions' :{
+                'series':{
+                    'stacking':'normal'
+                }
+            },
+            'title':{'text':'Bar Graph For Groups'},
+            'xAxis':{'categories':group_names},
+            'series':[group_lent_series,group_borr_series]
+        }
+        #################
+        #chart5 (tag,expenditure)
+        #"Movies","Food","Housing","Travel","Others"
+        chart5 = {
+            'chart':{'type':'area'},
+            'title':{'text':'Time Series Plot for expenditure for different tags'},
+            'xAxis':{
+                'categories':dates_approved
+            },
+            'series':[{
+                'name':'Money Spent on Movies',
+                'data':Tag_approved_lists["Movies"]
+            },{
+                'name':'Money spent on Food',
+                'data':Tag_approved_lists["Food"]
+            },{
+                'name':'Money spent on Housing',
+                'data':Tag_approved_lists["Housing"]
+            },{
+                'name':'Money spent on Travel',
+                'data':Tag_approved_lists["Travel"]
+            },{
+                'name':'Money spent on Others',
+                'data':Tag_approved_lists["Others"]
+            }]
+        }
+        #############
+        dump1 = json.dumps(chart1)
+        dump2 = json.dumps(chart2)
+        dump3 = json.dumps(chart3)
+        dump4 = json.dumps(chart4)
+        dump5 = json.dumps(chart5)
+        ##############
+
+
+        return render(request,'dappx/plot.html',{'chart1':dump1,'chart2':dump2,'chart3':dump3,'chart4':dump4,'chart5':dump5,'excel':html_str})
+    else:
+        return render(request,'dappx/time_series_plots.html')
+

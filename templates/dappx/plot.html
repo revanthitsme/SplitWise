@@ -1,0 +1,40 @@
+<p>Click the button  to print the current page.</p>
+<button onclick="myFunction()" >Print</button>
+
+<script>
+function myFunction() {
+  window.print();
+}
+</script>
+<div id="container5"></div>
+<div id="container1"></div>
+<div id="container2"></div>
+<div id="container3"></div>
+<div id="container4"></div>
+<div id="table" align="center">
+	{% block content %}
+	{{ excel | safe}}
+	{% endblock %}
+	
+</div>
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script>
+	let chart5 = Highcharts.chart('container5', {{ chart5|safe }})
+</script>
+<script>
+	let chart1 = Highcharts.chart('container1', {{ chart1|safe }})
+</script>
+<script>
+	let chart2 = Highcharts.chart('container2', {{ chart2|safe }})
+</script>
+<script>
+	let chart3 = Highcharts.chart('container3', {{ chart3|safe }})
+</script>
+<script>
+	let chart4 = Highcharts.chart('container4', {{ chart4|safe }})
+</script>
+
+
+
+
+	
