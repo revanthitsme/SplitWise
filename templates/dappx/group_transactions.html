@@ -1,0 +1,13 @@
+{% extends "dappx/usermain.html" %}
+{% load staticfiles %}{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+      <h1>Choose a type of transaction</h1>
+     <a href="{% url 'dappx:Transactions' %}"><button>Equal @ all</button></a>
+     <br>
+     <a href="{% url 'dappx:Transactions_unequal' %}">
+     <button>Unequal @ all</button>
+     </a>
+    </div>
+  </div>
+{% endblock %}

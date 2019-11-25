@@ -19,12 +19,14 @@
 		{% endfor %}
 
 		{% for key,value in members_dict.items %}
+		{% ifnotequal key "no_group" %}
 		<h2>
 			<a href="">{{ key }}</a> - {{ value }}
 		</h2>
 			<a href="{% url 'dappx:settle_up_in_group' operation=group pk=key.pk %}">
         		<button>Settle Up</button>
       		</a>
+      	{% endifnotequal %}
 		{% endfor %}
     </div>
   </div>

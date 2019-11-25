@@ -2,18 +2,24 @@
 {% load staticfiles %}{% block body_block %}
   <div class="container">
     <div class="jumbotron">
-      <h1>Here are your friends.</h1>
+      <h2>Here are your friends.</h2>
       <br>
     
-      <h1>Amount they owe</h1>
-      {% for key,value in owed_dict.items %}<h2><a href="{% url 'dappx:view_friend' pk=key.pk %}">{{ key }}</a> - {{ value }}</h2>{% endfor %}
-      <h1>Amount I owe</h1>
-      {% for key,value in owe_dict.items %}<h2><a href="{% url 'dappx:view_friend' pk=key.pk %}">{{ key }}</a> - {{ value }}</h2>{% endfor %}
+      <h4>Amount they owe:</h4>
+      {% for key,value in owed_dict.items %}<p><a href="{% url 'dappx:view_friend' pk=key.pk %}">{{ key }}</a> owes {{ value }} to you.</p>{% endfor %}
+      <h4>Amount I owe</h4>
+      {% for key,value in owe_dict.items %}<p>You owe {{ value }} to <a href="{% url 'dappx:view_friend' pk=key.pk %}">{{ key }}</a>.</p>{% endfor %}
       {% for no_friend in nothing_friend_list %}
-        <h2><a href="{% url 'dappx:view_friend' pk=no_friend.pk %}">{{ no_friend }}</a> - 0 </h2>
+        <p><a href="{% url 'dappx:view_friend' pk=no_friend.pk %}">{{ no_friend }}</a> - 0 </p>
       {% endfor %}
       {% if no_exists %}
-      <h2>User doesn't exist Try again!</h2>
+      <p>User doesn't exist Try again!</p>
+      {% endif %}
+      {% if user_given_in_list %}
+      <p>You can't friend yourself. Try again</>
+      {% endif %}
+      {% if empty %}
+      <h2>Name field is empty.Try again</h2>
       {% endif %}
       <form method="post" action="{% url 'dappx:addfriends' %}">
           {% csrf_token %}
