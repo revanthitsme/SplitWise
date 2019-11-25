@@ -1,0 +1,48 @@
+{% extends "dappx/Transactions_unequal.html" %}
+{% load staticfiles %}{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+    	<h3>Give the input in the following order of users</h3>
+    	<div>
+    		<h2>{{ Groupname }}</h2>
+    		{% for member1 in members %}
+    		<p>{{ member1 }}</p>
+    		{% endfor %}
+    	</div>
+    	<form method="post" action="{% url 'dappx:Transactions_unequal_actual' operation=members groupname=Groupname %}">
+          {% csrf_token %}
+          {# A more "HTML" way of creating the login form#}
+          {% if fields_empty %}
+          <h3>One or more field(s) is empty. Check and try again.</h3>
+          {% endif %}
+          {% if Tag_not_approved %}
+          <h4> **Tag is not approved</h4>
+          {% endif %}
+          {% if incomplete_leng %}
+          <h4> Error in input of Donating Amount or Shares lengths. Check and try again.</h4>
+          {% endif %}
+          {% if amount_err %}
+          <h4> Error.Donating Amount total or Shares total doesnt equal to total amount. Check and try again</h4>
+          {% endif %}
+          <label for="Amount">Amount:</label>
+          <input type="number" name="Amount" placeholder="Amount" step="0.01">
+          <br>
+          <label for="Donating_Amount">Donating Amount:</label>
+          <input type="text" name="Donating_Amount" placeholder="Donating_Amount">
+          <br>
+          <label for="Shares">Shares:</label>
+          <input type="text" name="Shares" placeholder="Shares">
+          <br>
+          <label for="Description">Description:</label>
+          <input type="text" name="Description" placeholder="Description">
+          <br>
+          <h4> Choose one from Movies,Food,Housing,Travel,Others(case sensitive)</h4>
+          <br>
+          <label for="Tag">Tag:</label>
+          <input type="text" name="Tag" placeholder="Tag">
+          <br>
+          <input type="submit" name="" value="Transact">
+      	  </form>
+    </div>
+  </div>
+{% endblock %}

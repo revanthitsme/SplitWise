@@ -21,22 +21,22 @@
       <form method="post" action="{% url 'dappx:creategroup' %}">
           {% csrf_token %}
           {% if create_group %}
-          <h3>This Group doesn't exist!! Create it First</h3>
+          <h3>This Group doesn't exist!! Create it and try again</h3>
           {% endif %}
           {% if DupFriends %}
-          <h3>there's a repition </h3>
+          <h3>There's a repition.Check and Try again.</h3>
           {% endif %}
           {% if NoFriend %}
-          <h3>User doesn't exist</h3>
+          <h3>User doesn't exist.Try again</h3>
           {% endif %}
           {% if Exists %}
-          <h3>Groupname already used</h3>
+          <h3>Groupname already exists.Try again</h3>
           {% endif %}
           {% if null_group %}
-          <h3>Give some name M**F**</h3>
+          <h3>One of the Field(s) is empty.Check and Try again.</h3>
           {% endif %}
           {% if user_given_in_list %}
-          <h2>You have given your name YOU FOOOOOOOL!!!!</h2>
+          <h2>Self is given. Check and try again</h2>
           {% endif %}
           <label for="group_name">Group name:</label>
           <input type="text" name="group_name" placeholder="group_name">
