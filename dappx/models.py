@@ -41,7 +41,8 @@ class Transaction(models.Model):
 
 	Description = models.CharField(max_length=50)
 
-	Amount = models.FloatField(default=0)
+	Amount = models.DecimalField(default=0,max_digits=12, decimal_places=3)
+
 	# SplitAmount = models.ListCharField(
 	# 	base_field = models.FloatField(max_length=18),
  #        size=10,
@@ -54,12 +55,7 @@ class Transaction(models.Model):
 	Date = models.DateTimeField(auto_now_add=True)
 	Date2 = models.CharField(default=date.today().strftime('%Y-%m-%d'),max_length=25)
 	Expenditure = models.FloatField(default=0)
-	shares = ListCharField(
-		base_field = models.CharField(max_length=18),
-        size=10,
-        max_length=(18 * 11),  # 18 * 10 character nominals, plus commas
-        default = []
-    )
+
 
 #####################
 
@@ -84,8 +80,8 @@ class Friends(models.Model):
 class ftoftransaction(models.Model):
 	Donor = models.ForeignKey(User,related_name='Donor1',on_delete=models.CASCADE)
 	Receiver = models.ForeignKey(User,related_name='Receiver1',on_delete=models.CASCADE)
-	Amount = models.FloatField(default=0)
-	Damount = models.FloatField(default=0)
+	Amount = models.DecimalField(default=0,max_digits=12, decimal_places=3)
+	Damount = models.DecimalField(default=0,max_digits=12, decimal_places=3)
 	Description = models.CharField(max_length=50)
 	Group = models.CharField(max_length=20)
 	Tag = models.CharField(max_length=15,default="Others")
@@ -96,8 +92,8 @@ class ftoftransaction(models.Model):
 class GroupsModel(models.Model):
 	Group = models.CharField(max_length=20)
 	Member = models.ForeignKey(User,related_name='Member',on_delete=models.CASCADE)
-	Amount = models.FloatField(default=0)
-	Damount = models.FloatField(default=0)
+	Amount = models.DecimalField(default=0,max_digits=12, decimal_places=3)
+	Damount = models.DecimalField(default=0,max_digits=12, decimal_places=3)
 	Description = models.CharField(max_length=50)
 	Tag = models.CharField(max_length=15,default="Others")
 	in_group = models.BooleanField(default=True)
@@ -111,9 +107,9 @@ class notificationsModel(models.Model):
 class Activity(models.Model):
 	Button_name = models.CharField(max_length=25)
 	Group_name = models.CharField(max_length=20)
-	Donor = models.CharField(max_length=200)
+	Donor = models.CharField(max_length=20)
 	Receivers_list = models.CharField(max_length=200)
-	Amount = models.FloatField(default=0)
+	Amount = models.DecimalField(default=0,max_digits=12, decimal_places=3)
 	Description = models.CharField(max_length=50)
 	Time = models.DateTimeField(auto_now_add=True)
 	Tag = models.CharField(max_length=15,default="other")
